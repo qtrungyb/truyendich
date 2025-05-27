@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tính thời gian truyền dịch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --danger: #ff6b6b;
+            --light: #f8f9fa;
+            --dark: #2b2d42;
+            --success: #6bd425;
+            --border-radius: 10px;
+            --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            padding: 30px 15px;
+            color: var(--dark);
+        }
+        
+        .app-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            border: 1px solid #e0e6ed;
+        }
+        
+        .app-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent);
+        }
+        
+        .app-header h1 {
+            font-weight: 600;
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+        
+        .app-header p {
+            font-weight: 300;
+            opacity: 0.9;
+            font-size: 15px;
+        }
+        
+        .app-body {
+            padding: 25px;
+            background-color: #fff;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #5bbd1f;
+            transform: translateY(-1px);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #e86060;
+        }
+        
+        .btn i {
+            margin-right: 7px;
+            font-size: 14px;
+        }
+        
+        .infusion-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 25px;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .infusion-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 14px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .infusion-table td {
+            padding: 14px;
+            text-align: center;
+            border-bottom: 1px solid #edf2f7;
+            transition: background 0.2s;
+        }
+        
+        .infusion-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .infusion-table tr:hover td {
+            background-color: #f8fafc;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s;
+            text-align: center;
+            background-color: #f8fafc;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            background-color: white;
+            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+        }
+        
+        .time-display {
+            font-weight: 500;
+            font-size: 15px;
+            color: var(--secondary);
+        }
+        
+        .summary-row {
+            background-color: #f0f7ff !important;
+            font-weight: 600;
+        }
+        
+        .summary-row td {
+            padding: 14px;
+        }
+        
+        .time-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .time-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 18px 25px;
+            box-shadow: var(--box-shadow);
+            text-align: center;
+            min-width: 200px;
+            border-top: 3px solid var(--accent);
+            transition: transform 0.2s;
+            background-color: #f8fafc;
+        }
+        
+        .time-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .time-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .time-value {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .formula-note {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: #64748b;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: var(--border-radius);
+            border: 1px dashed #cbd5e1;
+        }
+        
+        .formula-note strong {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        @media (max-width: 768px) {
+            .app-body {
+                padding: 20px;
+            }
+            
+            .time-container {
+                gap: 15px;
+            }
+            
+            .time-card {
+                min-width: 100%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <h1><i class="fas fa-clock"></i> TÍNH THỜI GIAN TRUYỀN DỊCH</h1>
+        </div>
+        
+        <div class="app-body">
+            <div class="controls">
+                <button class="btn btn-primary" id="addRow">
+                    <i class="fas fa-plus"></i> Thêm mới
+                </button>
+            </div>
+            
+            <table class="infusion-table">
+                <thead>
+                    <tr>
+                        <th>Thể tích (ml)</th>
+                        <th>Tốc độ (giọt/phút)</th>
+                        <th>Thời gian</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="number" class="input-field volume" min="0" value="500"></td>
+                        <td><input type="number" class="input-field rate" min="1" value="40"></td>
+                        <td class="time-display duration">04:10</td>
+                        <td><button class="btn btn-danger deleteRow"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr class="summary-row">
+                        <td id="totalVolume">500</td>
+                        <td>Tổng thời gian</td>
+                        <td id="totalDuration" class="time-value">04:10</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="time-container">
+                <div class="time-card">
+                    <div class="time-label">Giờ bắt đầu</div>
+                    <input type="time" class="input-field" id="globalStartTime" value="08:00">
+                </div>
+                <div class="time-card">
+                    <div class="time-label">Giờ kết thúc</div>
+                    <div class="time-value" id="globalEndTime">12:10</div>
+                </div>
+            </div>
+            
+            <div class="formula-note">
+                <strong>Công thức tính:</strong> (Thể tích × 20 giọt/ml) ÷ Tốc độ = Thời gian (phút)
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const table = document.querySelector('.infusion-table');
+            const addRowBtn = document.getElementById('addRow');
+            const globalStartTime = document.getElementById('globalStartTime');
+            const globalEndTime = document.getElementById('globalEndTime');
+            const DROPS_PER_ML = 20; 
+            
+ 
+            addRowBtn.addEventListener('click', function() {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="number" class="input-field volume" min="0" value=""></td>
+                    <td><input type="number" class="input-field rate" min="1" value=""></td>
+                    <td class="time-display duration">00:00</td>
+                    <td><button class="btn btn-danger deleteRow"><i class="fas fa-trash"></i></button></td>
+                `;
+                table.querySelector('tbody').appendChild(newRow);
+                
+                newRow.querySelector('.deleteRow').addEventListener('click', function() {
+                    if (table.querySelectorAll('tbody tr').length > 1) {
+                        newRow.remove();
+                        calculateAll();
+                    } else {
+                        alert('Phải có ít nhất một dòng dữ liệu!');
+                    }
+                });
+                
+    
+                const inputs = newRow.querySelectorAll('.volume, .rate');
+                inputs.forEach(input => {
+                    input.addEventListener('input', calculateAll);
+                });
+            });
+            
+            document.querySelector('.deleteRow').addEventListener('click', function() {
+                const row = this.closest('tr');
+                if (table.querySelectorAll('tbody tr').length > 1) {
+                    row.remove();
+                    calculateAll();
+                } else {
+                    alert('Phải có ít nhất một dòng dữ liệu!');
+                }
+            });
+            
+      
+            function calculateAll() {
+                const rows = table.querySelectorAll('tbody tr');
+                let totalVolume = 0;
+                let totalMinutes = 0;
+                
+                rows.forEach(row => {
+                    const volume = parseFloat(row.querySelector('.volume').value) || 0;
+                    const rate = parseFloat(row.querySelector('.rate').value) || 1;
+                    
+      
+                    const durationMinutes = (volume * DROPS_PER_ML) / rate;
+                    
+  
+                    const hours = Math.floor(durationMinutes / 60);
+                    const minutes = Math.floor(durationMinutes % 60);
+                    const durationStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                    
+                    row.querySelector('.duration').textContent = durationStr;
+                    
+                    totalVolume += volume;
+                    totalMinutes += durationMinutes;
+                });
+                
+
+                document.getElementById('totalVolume').textContent = totalVolume;
+
+                const totalHours = Math.floor(totalMinutes / 60);
+                const remainingMinutes = Math.floor(totalMinutes % 60);
+                const totalDurationStr = `${String(totalHours).padStart(2, '0')}:${String(remainingMinutes).padStart(2, '0')}`;
+                document.getElementById('totalDuration').textContent = totalDurationStr;
+                
+   
+                const startTime = globalStartTime.value;
+                if (startTime) {
+                    const [startHours, startMinutes] = startTime.split(':').map(Number);
+                    let endHours = startHours + totalHours;
+                    let endMinutes = startMinutes + remainingMinutes;
+                    
+
+                    if (endMinutes >= 60) {
+                        endHours += Math.floor(endMinutes / 60);
+                        endMinutes = endMinutes % 60;
+                    }
+                    
+                    if (endHours >= 24) {
+                        endHours = endHours % 24;
+                    }
+                    
+                    const endTimeStr = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+                    globalEndTime.textContent = endTimeStr;
+                }
+            }
+            
+     
+            document.querySelectorAll('.volume, .rate').forEach(input => {
+                input.addEventListener('input', calculateAll);
+            });
+            
+
+            globalStartTime.addEventListener('input', calculateAll);
+
+            calculateAll();
+        });
+    </script>
+</body>
+</html>
+			
+
