@@ -5,17 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tính thời gian truyền dịch</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         :root {
-            --primary: #4a6fa5;
-            --secondary: #166088;
-            --accent: #4fc3f7;
-            --danger: #ff6b6b;
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --accent: #1abc9c;
+            --danger: #e74c3c;
             --light: #f8f9fa;
-            --dark: #2b2d42;
-            --success: #6bd425;
-            --border-radius: 10px;
+            --dark: #34495e;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --border-radius: 12px;
             --box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
         }
         
         * {
@@ -26,10 +29,11 @@
         
         body {
             font-family: 'Roboto', sans-serif;
-            background: #f0f4f8;
+            background: linear-gradient(135deg, #e0f7fa 0%, #f5f5f5 100%);
             min-height: 100vh;
             padding: 30px 15px;
             color: var(--dark);
+            line-height: 1.6;
         }
         
         .app-container {
@@ -40,49 +44,90 @@
             box-shadow: var(--box-shadow);
             overflow: hidden;
             border: 1px solid #e0e6ed;
+            transition: var(--transition);
         }
         
         .app-header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 25px 30px;
+            padding: 30px;
             text-align: center;
-            border-bottom: 3px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .app-header::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            z-index: 0;
         }
         
         .app-header h1 {
-            font-weight: 600;
-            font-size: 26px;
-            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 32px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .app-header p {
             font-weight: 300;
             opacity: 0.9;
-            font-size: 15px;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
         .app-body {
-            padding: 25px;
+            padding: 30px;
             background-color: #fff;
         }
         
         .controls {
             display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .btn {
-            padding: 10px 18px;
+            padding: 12px 22px;
             border: none;
             border-radius: var(--border-radius);
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
-            font-size: 14px;
+            font-size: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+        
+        .btn:hover::after {
+            transform: translateX(100%);
         }
         
         .btn-primary {
@@ -91,8 +136,20 @@
         }
         
         .btn-primary:hover {
-            background-color: #5bbd1f;
-            transform: translateY(-1px);
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-secondary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
         
         .btn-danger {
@@ -101,39 +158,47 @@
         }
         
         .btn-danger:hover {
-            background-color: #e86060;
+            background-color: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
         }
         
         .btn i {
-            margin-right: 7px;
-            font-size: 14px;
+            margin-right: 8px;
+            font-size: 15px;
         }
         
         .infusion-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             background: white;
             border-radius: var(--border-radius);
             overflow: hidden;
-            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
         
         .infusion-table th {
             background-color: var(--primary);
             color: white;
-            padding: 14px;
+            padding: 16px;
             text-align: center;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 15px;
+            position: sticky;
+            top: 0;
         }
         
         .infusion-table td {
-            padding: 14px;
+            padding: 16px;
             text-align: center;
             border-bottom: 1px solid #edf2f7;
             transition: background 0.2s;
+        }
+        
+        .infusion-table tr:nth-child(even) {
+            background-color: #f8fafc;
         }
         
         .infusion-table tr:last-child td {
@@ -141,98 +206,202 @@
         }
         
         .infusion-table tr:hover td {
-            background-color: #f8fafc;
+            background-color: #ecf0f1;
         }
         
         .input-field {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 15px;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.2s;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: var(--transition);
             text-align: center;
-            background-color: #f8fafc;
+            background-color: white;
+            font-weight: 500;
+            color: var(--dark);
         }
         
         .input-field:focus {
             outline: none;
             border-color: var(--accent);
-            background-color: white;
-            box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.2);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2);
         }
         
         .time-display {
-            font-weight: 500;
-            font-size: 15px;
+            font-weight: 600;
+            font-size: 16px;
             color: var(--secondary);
+            min-width: 80px;
+            display: inline-block;
         }
         
         .summary-row {
-            background-color: #f0f7ff !important;
-            font-weight: 600;
+            background-color: #e3f2fd !important;
+            font-weight: 700;
         }
         
         .summary-row td {
-            padding: 14px;
+            padding: 16px;
+            font-size: 16px;
+            color: var(--primary);
         }
         
         .time-container {
             display: flex;
             justify-content: center;
-            gap: 25px;
-            margin-top: 25px;
+            gap: 30px;
+            margin-top: 30px;
             flex-wrap: wrap;
         }
         
         .time-card {
             background: white;
             border-radius: var(--border-radius);
-            padding: 18px 25px;
+            padding: 20px 30px;
             box-shadow: var(--box-shadow);
             text-align: center;
-            min-width: 200px;
-            border-top: 3px solid var(--accent);
-            transition: transform 0.2s;
-            background-color: #f8fafc;
+            min-width: 220px;
+            border-top: 4px solid var(--accent);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
         }
         
         .time-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .time-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s ease;
+        }
+        
+        .time-card:hover::before {
+            transform: scaleX(1);
         }
         
         .time-label {
-            font-size: 14px;
-            color: #64748b;
-            margin-bottom: 8px;
+            font-size: 15px;
+            color: #7f8c8d;
+            margin-bottom: 12px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .time-value {
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 24px;
+            font-weight: 700;
             color: var(--secondary);
         }
         
         .formula-note {
             text-align: center;
-            margin-top: 25px;
-            font-size: 14px;
-            color: #64748b;
-            padding: 12px;
+            margin-top: 30px;
+            font-size: 15px;
+            color: #7f8c8d;
+            padding: 15px;
             background: #f8fafc;
             border-radius: var(--border-radius);
-            border: 1px dashed #cbd5e1;
+            border: 1px dashed #bdc3c7;
+            position: relative;
         }
         
         .formula-note strong {
-            color: var(--secondary);
+            color: var(--accent);
             font-weight: 600;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--success);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .info-section {
+            background: #e8f4fc;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 25px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .info-section h3 {
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-section ul {
+            padding-left: 20px;
+        }
+        
+        .info-section li {
+            margin-bottom: 8px;
+            color: var(--dark);
+        }
+        
+        .counter {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+            border-top: 1px solid #ecf0f1;
+            margin-top: 20px;
         }
         
         @media (max-width: 768px) {
             .app-body {
                 padding: 20px;
+            }
+            
+            .app-header {
+                padding: 20px;
+            }
+            
+            .app-header h1 {
+                font-size: 26px;
             }
             
             .time-container {
@@ -243,20 +412,74 @@
                 min-width: 100%;
                 margin-bottom: 15px;
             }
+            
+            .infusion-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .app-header h1 {
+                font-size: 22px;
+            }
+            
+            .infusion-table th, 
+            .infusion-table td {
+                padding: 12px 10px;
+                font-size: 14px;
+            }
+            
+            .input-field {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .time-value {
+                font-size: 20px;
+            }
+        }
+        
+        /* Animation for table rows */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .infusion-table tbody tr {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        
+        /* Pulse animation for time cards */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        
+        .time-card.pulse {
+            animation: pulse 1s ease;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     <div class="app-container">
         <div class="app-header">
             <h1><i class="fas fa-clock"></i> TÍNH THỜI GIAN TRUYỀN DỊCH</h1>
+            <p>Công cụ tính toán thời gian truyền dịch dựa trên thể tích và tốc độ truyền</p>
         </div>
         
         <div class="app-body">
             <div class="controls">
                 <button class="btn btn-primary" id="addRow">
-                    <i class="fas fa-plus"></i> Thêm mới
+                    <i class="fas fa-plus"></i> Thêm dòng mới
+                </button>
+                <button class="btn btn-secondary" id="resetBtn">
+                    <i class="fas fa-sync-alt"></i> Đặt lại
                 </button>
             </div>
             
@@ -271,15 +494,15 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td><input type="number" class="input-field volume" min="0" value="500"></td>
-                        <td><input type="number" class="input-field rate" min="1" value="40"></td>
+                        <td><input type="number" class="input-field volume" min="0" value="500" placeholder="Nhập thể tích"></td>
+                        <td><input type="number" class="input-field rate" min="1" value="40" placeholder="Nhập tốc độ"></td>
                         <td class="time-display duration">04:10</td>
                         <td><button class="btn btn-danger deleteRow"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 </tbody>
                 <tfoot>
                     <tr class="summary-row">
-                        <td id="totalVolume">500</td>
+                        <td id="totalVolume">500 ml</td>
                         <td>Tổng thời gian</td>
                         <td id="totalDuration" class="time-value">04:10</td>
                         <td></td>
@@ -289,11 +512,11 @@
             
             <div class="time-container">
                 <div class="time-card">
-                    <div class="time-label">Giờ bắt đầu</div>
+                    <div class="time-label"><i class="fas fa-play-circle"></i> Giờ bắt đầu</div>
                     <input type="time" class="input-field" id="globalStartTime" value="08:00">
                 </div>
                 <div class="time-card">
-                    <div class="time-label">Giờ kết thúc</div>
+                    <div class="time-label"><i class="fas fa-flag-checkered"></i> Giờ kết thúc</div>
                     <div class="time-value" id="globalEndTime">12:10</div>
                 </div>
             </div>
@@ -301,23 +524,52 @@
             <div class="formula-note">
                 <strong>Công thức tính:</strong> (Thể tích × 20 giọt/ml) ÷ Tốc độ = Thời gian (phút)
             </div>
+            
+            <div class="info-section">
+                <h3><i class="fas fa-info-circle"></i> Hướng dẫn sử dụng</h3>
+                <ul>
+                    <li><span class="counter">1</span> Nhập thể tích dịch (ml) và tốc độ truyền (giọt/phút) vào các ô tương ứng</li>
+                    <li><span class="counter">2</span> Thời gian truyền sẽ được tính toán tự động</li>
+                    <li><span class="counter">3</span> Sử dụng nút "Thêm dòng mới" để thêm nhiều loại dịch truyền</li>
+                    <li><span class="counter">4</span> Nhập giờ bắt đầu để tính giờ kết thúc dự kiến</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Công cụ hỗ trợ nhân viên y tế - Phiên bản 2.0</p>
         </div>
     </div>
+    
+    <div class="notification" id="notification">Thông báo</div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const table = document.querySelector('.infusion-table');
             const addRowBtn = document.getElementById('addRow');
+            const resetBtn = document.getElementById('resetBtn');
             const globalStartTime = document.getElementById('globalStartTime');
             const globalEndTime = document.getElementById('globalEndTime');
+            const notification = document.getElementById('notification');
             const DROPS_PER_ML = 20; 
             
- 
+            // Hiển thị thông báo
+            function showNotification(message, isSuccess = true) {
+                notification.textContent = message;
+                notification.style.background = isSuccess ? 'var(--success)' : 'var(--danger)';
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Thêm hàng mới
             addRowBtn.addEventListener('click', function() {
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                    <td><input type="number" class="input-field volume" min="0" value=""></td>
-                    <td><input type="number" class="input-field rate" min="1" value=""></td>
+                    <td><input type="number" class="input-field volume" min="0" value="" placeholder="Nhập thể tích"></td>
+                    <td><input type="number" class="input-field rate" min="1" value="" placeholder="Nhập tốc độ"></td>
                     <td class="time-display duration">00:00</td>
                     <td><button class="btn btn-danger deleteRow"><i class="fas fa-trash"></i></button></td>
                 `;
@@ -327,42 +579,75 @@
                     if (table.querySelectorAll('tbody tr').length > 1) {
                         newRow.remove();
                         calculateAll();
+                        showNotification('Đã xóa dòng dữ liệu');
                     } else {
-                        alert('Phải có ít nhất một dòng dữ liệu!');
+                        showNotification('Phải có ít nhất một dòng dữ liệu!', false);
                     }
                 });
                 
-    
+                // Thêm sự kiện cho input mới
                 const inputs = newRow.querySelectorAll('.volume, .rate');
                 inputs.forEach(input => {
                     input.addEventListener('input', calculateAll);
                 });
+                
+                showNotification('Đã thêm dòng mới');
             });
             
+            // Nút đặt lại
+            resetBtn.addEventListener('click', function() {
+                const rows = table.querySelectorAll('tbody tr');
+                if (rows.length > 1) {
+                    rows.forEach((row, index) => {
+                        if (index > 0) row.remove();
+                    });
+                }
+                
+                const firstRow = table.querySelector('tbody tr');
+                firstRow.querySelector('.volume').value = '';
+                firstRow.querySelector('.rate').value = '';
+                
+                globalStartTime.value = '08:00';
+                
+                calculateAll();
+                showNotification('Đã đặt lại dữ liệu');
+            });
+            
+            // Xóa hàng
             document.querySelector('.deleteRow').addEventListener('click', function() {
                 const row = this.closest('tr');
                 if (table.querySelectorAll('tbody tr').length > 1) {
                     row.remove();
                     calculateAll();
+                    showNotification('Đã xóa dòng dữ liệu');
                 } else {
-                    alert('Phải có ít nhất một dòng dữ liệu!');
+                    showNotification('Phải có ít nhất một dòng dữ liệu!', false);
                 }
             });
             
-      
+            // Tính toán tất cả
             function calculateAll() {
                 const rows = table.querySelectorAll('tbody tr');
                 let totalVolume = 0;
                 let totalMinutes = 0;
+                let hasEmptyFields = false;
                 
                 rows.forEach(row => {
-                    const volume = parseFloat(row.querySelector('.volume').value) || 0;
-                    const rate = parseFloat(row.querySelector('.rate').value) || 1;
+                    const volumeInput = row.querySelector('.volume');
+                    const rateInput = row.querySelector('.rate');
                     
-      
+                    const volume = parseFloat(volumeInput.value) || 0;
+                    const rate = parseFloat(rateInput.value) || 1;
+                    
+                    // Kiểm tra trường nhập liệu
+                    if (volumeInput.value === '' || rateInput.value === '') {
+                        hasEmptyFields = true;
+                    }
+                    
+                    // Tính thời gian truyền
                     const durationMinutes = (volume * DROPS_PER_ML) / rate;
                     
-  
+                    // Định dạng thời gian
                     const hours = Math.floor(durationMinutes / 60);
                     const minutes = Math.floor(durationMinutes % 60);
                     const durationStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
@@ -373,48 +658,80 @@
                     totalMinutes += durationMinutes;
                 });
                 
-
-                document.getElementById('totalVolume').textContent = totalVolume;
-
+                // Cập nhật tổng
+                document.getElementById('totalVolume').textContent = totalVolume + ' ml';
+                
                 const totalHours = Math.floor(totalMinutes / 60);
                 const remainingMinutes = Math.floor(totalMinutes % 60);
                 const totalDurationStr = `${String(totalHours).padStart(2, '0')}:${String(remainingMinutes).padStart(2, '0')}`;
                 document.getElementById('totalDuration').textContent = totalDurationStr;
                 
-   
+                // Tính giờ kết thúc
                 const startTime = globalStartTime.value;
                 if (startTime) {
                     const [startHours, startMinutes] = startTime.split(':').map(Number);
                     let endHours = startHours + totalHours;
                     let endMinutes = startMinutes + remainingMinutes;
                     
-
+                    // Xử lý tràn phút
                     if (endMinutes >= 60) {
                         endHours += Math.floor(endMinutes / 60);
                         endMinutes = endMinutes % 60;
                     }
                     
+                    // Xử lý tràn giờ
                     if (endHours >= 24) {
                         endHours = endHours % 24;
                     }
                     
                     const endTimeStr = `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
                     globalEndTime.textContent = endTimeStr;
+                    
+                    // Thêm hiệu ứng cho thẻ thời gian
+                    const timeCards = document.querySelectorAll('.time-card');
+                    timeCards[1].classList.add('pulse');
+                    setTimeout(() => {
+                        timeCards[1].classList.remove('pulse');
+                    }, 1000);
+                }
+                
+                // Hiển thị cảnh báo nếu có trường trống
+                if (hasEmptyFields) {
+                    showNotification('Vui lòng nhập đầy đủ thông tin', false);
                 }
             }
             
-     
+            // Thêm sự kiện cho các input
             document.querySelectorAll('.volume, .rate').forEach(input => {
                 input.addEventListener('input', calculateAll);
             });
             
-
+            // Thêm sự kiện cho thời gian bắt đầu
             globalStartTime.addEventListener('input', calculateAll);
-
+            
+            // Thêm sự kiện cho các nút xóa
+            document.querySelectorAll('.deleteRow').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    if (table.querySelectorAll('tbody tr').length > 1) {
+                        row.remove();
+                        calculateAll();
+                        showNotification('Đã xóa dòng dữ liệu');
+                    } else {
+                        showNotification('Phải có ít nhất một dòng dữ liệu!', false);
+                    }
+                });
+            });
+            
+            // Tính toán ban đầu
             calculateAll();
+            
+            // Hiệu ứng khi load trang
+            setTimeout(() => {
+                document.querySelector('.app-container').style.transform = 'translateY(0)';
+                document.querySelector('.app-container').style.opacity = '1';
+            }, 100);
         });
     </script>
 </body>
 </html>
-			
-
