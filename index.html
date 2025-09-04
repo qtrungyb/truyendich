@@ -565,6 +565,37 @@
             min-width: 300px;
         }
         
+        /* Context menu styles */
+        .context-menu {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            min-width: 150px;
+        }
+        
+        .context-menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+        
+        .context-menu-item:hover {
+            background-color: var(--table-row-hover);
+        }
+        
+        .context-menu-item i {
+            font-size: 14px;
+            width: 16px;
+            text-align: center;
+        }
+        
         /* Responsive adjustments for full-width layout */
         @media (min-width: 1200px) {
             .app-body {
@@ -735,7 +766,6 @@
                                     <th>Thể tích (ml)</th>
                                     <th>Tốc độ (giọt/phút)</th>
                                     <th>Thời gian</th>
-                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -743,7 +773,6 @@
                                     <td><input type="number" class="input-field volume" min="0" value="500" placeholder="Nhập thể tích"></td>
                                     <td><input type="number" class="input-field rate" min="1" value="40" placeholder="Nhập tốc độ"></td>
                                     <td class="time-display duration">04:10</td>
-                                    <td><button class="btn btn-danger deleteRow"><i class="fas fa-trash"></i></button></td>
                                 </tr>
                             </tbody>
                             <tfoot>
@@ -751,7 +780,6 @@
                                     <td id="totalVolume">500 ml</td>
                                     <td>Tổng thời gian</td>
                                     <td id="totalDuration" class="time-value">04:10</td>
-                                    <td></td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -779,6 +807,13 @@
     </div>
     
     <div class="notification" id="notification">Thông báo</div>
+    
+    <!-- Context Menu -->
+    <div id="contextMenu" class="context-menu">
+        <div class="context-menu-item" id="contextDelete">
+            <i class="fas fa-trash"></i> Xóa
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -789,7 +824,11 @@
             const globalEndTime = document.getElementById('globalEndTime');
             const notification = document.getElementById('notification');
             const themeToggle = document.getElementById('themeToggle');
+            const contextMenu = document.getElementById('contextMenu');
+            const contextDelete = document.getElementById('contextDelete');
             const DROPS_PER_ML = 20;
+            
+            let selectedRow = null;
             
             // Initialize app container animation
             setTimeout(() => {
@@ -827,6 +866,45 @@
                 }, 3000);
             }
             
+            // Context menu functionality
+            function initContextMenu() {
+                // Hide context menu when clicking elsewhere
+                document.addEventListener('click', function(e) {
+                    if (contextMenu.style.display === 'block') {
+                        contextMenu.style.display = 'none';
+                    }
+                });
+                
+                // Right-click to show context menu
+                document.addEventListener('contextmenu', function(e) {
+                    const row = e.target.closest('tr');
+                    if (row && row.parentElement === table.querySelector('tbody')) {
+                        e.preventDefault();
+                        selectedRow = row;
+                        
+                        // Position the context menu
+                        contextMenu.style.display = 'block';
+                        contextMenu.style.left = e.pageX + 'px';
+                        contextMenu.style.top = e.pageY + 'px';
+                    }
+                });
+                
+                // Delete row from context menu
+                contextDelete.addEventListener('click', function() {
+                    if (selectedRow) {
+                        const rows = table.querySelectorAll('tbody tr');
+                        if (rows.length > 1) {
+                            selectedRow.remove();
+                            calculateAll();
+                            showNotification('Đã xóa dòng dữ liệu');
+                        } else {
+                            showNotification('Phải có ít nhất một dòng dữ liệu!', false);
+                        }
+                        contextMenu.style.display = 'none';
+                    }
+                });
+            }
+            
             // Add row functionality
             addRowBtn.addEventListener('click', function() {
                 const newRow = document.createElement('tr');
@@ -834,20 +912,9 @@
                     <td><input type="number" class="input-field volume" min="0" value="" placeholder="Nhập thể tích"></td>
                     <td><input type="number" class="input-field rate" min="1" value="" placeholder="Nhập tốc độ"></td>
                     <td class="time-display duration">00:00</td>
-                    <td><button class="btn btn-danger deleteRow"><i class="fas fa-trash"></i></button></td>
                 `;
                 table.querySelector('tbody').appendChild(newRow);
                 
-                newRow.querySelector('.deleteRow').addEventListener('click', function() {
-                    if (table.querySelectorAll('tbody tr').length > 1) {
-                        newRow.remove();
-                        calculateAll();
-                        showNotification('Đã xóa dòng dữ liệu');
-                    } else {
-                        showNotification('Phải có ít nhất một dòng dữ liệu!', false);
-                    }
-                });
-
                 const inputs = newRow.querySelectorAll('.volume, .rate');
                 inputs.forEach(input => {
                     input.addEventListener('input', calculateAll);
@@ -873,18 +940,6 @@
                 
                 calculateAll();
                 showNotification('Đã đặt lại dữ liệu');
-            });
-
-            // Delete row functionality
-            document.querySelector('.deleteRow').addEventListener('click', function() {
-                const row = this.closest('tr');
-                if (table.querySelectorAll('tbody tr').length > 1) {
-                    row.remove();
-                    calculateAll();
-                    showNotification('Đã xóa dòng dữ liệu');
-                } else {
-                    showNotification('Phải có ít nhất một dòng dữ liệu!', false);
-                }
             });
 
             // Calculation function
@@ -961,21 +1016,9 @@
 
             globalStartTime.addEventListener('input', calculateAll);
             
-            document.querySelectorAll('.deleteRow').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const row = this.closest('tr');
-                    if (table.querySelectorAll('tbody tr').length > 1) {
-                        row.remove();
-                        calculateAll();
-                        showNotification('Đã xóa dòng dữ liệu');
-                    } else {
-                        showNotification('Phải có ít nhất một dòng dữ liệu!', false);
-                    }
-                });
-            });
-            
             // Initialize
             initTheme();
+            initContextMenu();
             calculateAll();
         });
     </script>
